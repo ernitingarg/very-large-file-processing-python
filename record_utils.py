@@ -65,6 +65,9 @@ class RecordUtils:
             List[int]: A list of unique IDs associated with the X-largest values.
         """
 
+        if not data_lines:
+            return []
+
         # Number of CPU cores available on the system
         num_cores = multiprocessing.cpu_count()
 

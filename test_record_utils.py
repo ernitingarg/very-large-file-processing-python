@@ -17,8 +17,8 @@ class TestRecordUtils(unittest.TestCase):
         ]
 
         top_x = 3
-        expected_result = [105, 107, 103]
-        result = RecordUtils.find_largest_ids(data_lines, top_x)
+        expected_result = [107, 103, 105]
+        result = RecordUtils.find_largest_ids_parallel(data_lines, top_x)
         self.assertEqual(result, expected_result)
 
     def test_find_largest_ids_with_negative_values(self):
@@ -33,8 +33,8 @@ class TestRecordUtils(unittest.TestCase):
         ]
         top_x = 3
         # Negative values are also considered in the heap
-        expected_result = [106, 102, 104]
-        result = RecordUtils.find_largest_ids(data_lines, top_x)
+        expected_result = [104, 102, 106]
+        result = RecordUtils.find_largest_ids_parallel(data_lines, top_x)
         self.assertEqual(result, expected_result)
 
     def test_find_largest_ids_with_invalid_data(self):
@@ -49,8 +49,8 @@ class TestRecordUtils(unittest.TestCase):
         ]
         top_x = 3
         # Ignoring invalid lines, only considering valid ones
-        expected_result = [101, 103, 105]
-        result = RecordUtils.find_largest_ids(data_lines, top_x)
+        expected_result = [103, 105, 101]
+        result = RecordUtils.find_largest_ids_parallel(data_lines, top_x)
         self.assertEqual(result, expected_result)
 
     def test_find_largest_ids_with_fewer_records_than_top_x(self):
@@ -63,8 +63,8 @@ class TestRecordUtils(unittest.TestCase):
             "106 40",
         ]
         top_x = 10  # More than the number of records available
-        expected_result = [104, 102, 106, 101, 105, 103]
-        result = RecordUtils.find_largest_ids(data_lines, top_x)
+        expected_result = [103, 105, 101, 106, 102, 104]
+        result = RecordUtils.find_largest_ids_parallel(data_lines, top_x)
         self.assertEqual(result, expected_result)
 
     def test_find_largest_ids_with_duplicate_values(self):
@@ -79,15 +79,15 @@ class TestRecordUtils(unittest.TestCase):
         ]
         top_x = 3
         # Ignoring duplicates, considering only unique values
-        expected_result = [105, 107, 103]
-        result = RecordUtils.find_largest_ids(data_lines, top_x)
+        expected_result = [103, 107, 105]
+        result = RecordUtils.find_largest_ids_parallel(data_lines, top_x)
         self.assertEqual(result, expected_result)
 
     def test_find_largest_ids_with_empty_input(self):
         data_lines = []
         top_x = 3
         expected_result = []  # No records, so the result should be an empty list
-        result = RecordUtils.find_largest_ids(data_lines, top_x)
+        result = RecordUtils.find_largest_ids_parallel(data_lines, top_x)
         self.assertEqual(result, expected_result)
 
     def test_find_largest_ids_with_zero_top_x(self):
@@ -102,5 +102,5 @@ class TestRecordUtils(unittest.TestCase):
         ]
         top_x = 0
         expected_result = []  # 0 top x, so the result should be an empty list
-        result = RecordUtils.find_largest_ids(data_lines, top_x)
+        result = RecordUtils.find_largest_ids_parallel(data_lines, top_x)
         self.assertEqual(result, expected_result)
