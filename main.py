@@ -1,9 +1,10 @@
-from typing import List
+import os
+from typing import Generator, List
 import sys
 from record_utils import RecordUtils
 
 
-def read_input_data(file_path=None) -> List[str]:
+def read_input_data(file_path=None) -> Generator[str, None, None]:
     """
     Read input data from a file or stdin.
 
@@ -11,21 +12,23 @@ def read_input_data(file_path=None) -> List[str]:
         file_path (str): The path to the input file or None if reading from stdin.
 
     Returns:
-        list: A list of data lines.
+        list: A generator yielding data lines.
     """
     if file_path:
         try:
-            with open(file_path, 'r') as file_content:
-                return file_content.readlines()
-        except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Error: File '{file_path}' not found.") from e
+            with open(file_path, 'r') as file:
+                for line in file:
+                    yield line
         except Exception as e:
             raise Exception(
                 f"Error occurred while reading file '{file_path}': {e}") from e
     else:
         print("Enter data in the format '<unique record identifier> <numeric value>', one record per line:")
-        return sys.stdin.readlines()
+        while True:
+            line = input()
+            if not line:
+                break
+            yield line
 
 
 def process_input_data(file_path=None):
@@ -36,9 +39,13 @@ def process_input_data(file_path=None):
         file_path (str): The path to the input file or None if reading from stdin.
     """
     try:
+        if file_path and not os.path.exists(file_path):
+            print(f"File '{file_path}' not found.")
+            return
+
         top_x = int(input("Enter the value of X: "))
         if top_x <= 0:
-            print("Error: X must be a positive integer.")
+            print("Error: X must be a non-zero positive integer.")
             return
 
         data_lines = read_input_data(file_path)
@@ -49,7 +56,7 @@ def process_input_data(file_path=None):
             print(record_id)
 
     except ValueError:
-        print("Error: Invalid value of X, please enter a positive integer.")
+        print("Error: Invalid value of X, please enter a non-zero positive integer.")
     except Exception as e:
         print(f"Error: {e}")
 

@@ -1,6 +1,5 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import heapq
-import multiprocessing
 from record import Record
 from typing import List, Iterable
 
@@ -68,28 +67,34 @@ class RecordUtils:
         if not data_lines:
             return []
 
-        # Number of CPU cores available on the system
-        num_cores = multiprocessing.cpu_count()
-
         # Calculate chunk size to distribute data more evenly among threads
-        chunk_size = (len(data_lines) + num_cores - 1) // num_cores
-        print(
-            f"Data will be split into {chunk_size} chunks and "
-            f"will be processed in parallel by a maximum of {num_cores} threads."
-        )
+        chunk_size = 10000
 
-        # Split data_lines into smaller chunks
-        chunks = [data_lines[i:i + chunk_size]
-                  for i in range(0, len(data_lines), chunk_size)]
+        merged_results = []
+        # Process chunks in parallel using ProcessPoolExecutor with dynamic max workers
+        with ProcessPoolExecutor() as executor:
+            futures = []
+            chunk = []
+            for line in data_lines:
+                chunk.append(line)
+                if len(chunk) == chunk_size:
+                    future = executor.submit(
+                        RecordUtils.find_largest_records_in_chunk,
+                        chunk,
+                        top_x)
+                    futures.append(future)
+                    chunk = []
 
-        # Process chunks in parallel using ThreadPoolExecutor with dynamic max workers
-        with ThreadPoolExecutor(max_workers=num_cores) as executor:
-            results = list(executor.map(RecordUtils.find_largest_records_in_chunk, chunks, [
-                           top_x] * num_cores))
+            # remaining chunk less than chunk size
+            if chunk:
+                future = executor.submit(
+                    RecordUtils.find_largest_records_in_chunk,
+                    chunk,
+                    top_x)
+                futures.append(future)
 
-        # Merge the results from all chunks into a single list
-        merged_results = [
-            record for chunk_result in results for record in chunk_result]
+            for chunk_result in as_completed(futures):
+                merged_results.extend(chunk_result.result())
 
         # Get the X-largest values from the merged results
         x_largest = heapq.nlargest(
